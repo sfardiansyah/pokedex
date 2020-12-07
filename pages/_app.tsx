@@ -1,3 +1,4 @@
+import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
 import "../styles/globals.css";
 
 interface AppParams {
@@ -5,8 +6,15 @@ interface AppParams {
   pageProps: object;
 }
 
+const client = new ApolloClient({
+  uri: "https://graphql-pokemon2.vercel.app",
+  cache: new InMemoryCache(),
+});
+
 const MyApp = ({ Component, pageProps }: AppParams) => (
-  <Component {...pageProps} />
+  <ApolloProvider client={client}>
+    <Component {...pageProps} />
+  </ApolloProvider>
 );
 
 export default MyApp;
