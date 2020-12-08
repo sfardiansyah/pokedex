@@ -1,10 +1,12 @@
 import { gql, useQuery } from "@apollo/client";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Head from "next/head";
-import styles from "../styles/Home.module.css";
 
-const POKEMONS = gql`
+import { Pokemon } from "../types";
+
+const getPokemons = (n: number) => gql`
   query getPokemons {
-    pokemons(first: 20) {
+    pokemons(first: ${n}) {
       name
       id
       number
@@ -13,70 +15,67 @@ const POKEMONS = gql`
   }
 `;
 
-const Home: React.FC = () => {
-  const { data } = useQuery(POKEMONS);
+const PokemonItem: React.FC<{
+  forwardRef?: (instance: HTMLParagraphElement) => void;
+  pokemon: Pokemon;
+}> = ({ pokemon: { name }, forwardRef }) => {
+  return <p ref={forwardRef}>{name}</p>;
+};
 
-  console.log(data);
+const Home: React.FC = () => {
+  const [first, setFirst] = useState(45);
+  const [pokemonList, setPokemonList] = useState<Pokemon[]>([]);
+
+  const { loading, data } = useQuery<{ pokemons: Pokemon[] }>(
+    getPokemons(first)
+  );
+
+  const observer = useRef<IntersectionObserver>();
+
+  const lastRef = useCallback(
+    (node) => {
+      if (loading) return;
+      if (observer.current) observer.current.disconnect();
+
+      observer.current = new IntersectionObserver((items) => {
+        if (items[0].isIntersecting) {
+          setFirst((prev) => prev + 15);
+        }
+      });
+
+      if (node) observer.current.observe(node);
+    },
+    [loading, observer]
+  );
+
+  useEffect(() => {
+    if (data?.pokemons && !loading)
+      setPokemonList([
+        ...pokemonList,
+        ...data.pokemons.slice(pokemonList.length),
+      ]);
+  }, [data, loading]);
 
   return (
-    <div className={styles.container}>
+    <>
       <Head>
-        <title>Create Next App</title>
+        <title>Home | Pokédex</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{" "}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{" "}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
+      {pokemonList.map((pokemon, i) =>
+        i === pokemonList.length - 1 ? (
+          <PokemonItem
+            key={pokemon.number}
+            forwardRef={lastRef}
+            pokemon={pokemon}
+          />
+        ) : (
+          <PokemonItem key={pokemon.number} pokemon={pokemon} />
+        )
+      )}
+      {loading && <p>Loading...</p>}
+    </>
   );
 };
 
