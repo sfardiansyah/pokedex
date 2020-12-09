@@ -1,12 +1,14 @@
-import { gql, useQuery } from "@apollo/client";
-import { useCallback, useEffect, useRef, useState } from "react";
 import Head from "next/head";
 
+import { gql, useQuery } from "@apollo/client";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+import PokemonItem from "./PokemonItem";
 import { Pokemon } from "../types";
 
-const getPokemons = (n: number) => gql`
-  query getPokemons {
-    pokemons(first: ${n}) {
+const POKEMONS = gql`
+  query getPokemons($n: Int!) {
+    pokemons(first: $n) {
       name
       id
       number
@@ -15,20 +17,13 @@ const getPokemons = (n: number) => gql`
   }
 `;
 
-const PokemonItem: React.FC<{
-  forwardRef?: (instance: HTMLParagraphElement) => void;
-  pokemon: Pokemon;
-}> = ({ pokemon: { name }, forwardRef }) => {
-  return <p ref={forwardRef}>{name}</p>;
-};
-
 const Home: React.FC = () => {
   const [first, setFirst] = useState(45);
   const [pokemonList, setPokemonList] = useState<Pokemon[]>([]);
 
-  const { loading, data } = useQuery<{ pokemons: Pokemon[] }>(
-    getPokemons(first)
-  );
+  const { loading, data } = useQuery<{ pokemons: Pokemon[] }>(POKEMONS, {
+    variables: { n: first },
+  });
 
   const observer = useRef<IntersectionObserver>();
 
