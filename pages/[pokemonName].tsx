@@ -63,7 +63,9 @@ const PokemonDetail: React.FC = () => {
           <title>Loading... | Pokédex</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
-        <p>Loading...</p>
+        <div style={{ textAlign: "center" }}>
+          <p>Loading...</p>
+        </div>
       </>
     );
 
