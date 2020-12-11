@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CSSProperties, useEffect, useMemo, useState } from "react";
+import { CSSProperties, useEffect, useState } from "react";
 
 import { Pokemon } from "../types";
 import { K_COLOR_BY_TYPES } from "./constants";
@@ -10,15 +10,13 @@ const PokemonItem: React.FC<{
 }> = ({ pokemon: { name, image, number, types }, forwardRef }) => {
   const [pageWidth, setPageWidth] = useState(0);
 
-  const columns = useMemo(() => (pageWidth > 700 ? 7 : 2), [pageWidth]);
-
   useEffect(() => {
     if (typeof window !== undefined) setPageWidth(window.innerWidth);
   }, []);
 
   return (
     <Link href={`/${name.toLowerCase()}`}>
-      <div style={s.container(pageWidth, columns)}>
+      <div style={s.container(pageWidth)}>
         <p style={s.number}>{`#${number}`}</p>
         <div style={{ textAlign: "center" }}>
           <img src={image} style={{ objectFit: "contain", height: 50 }} />
@@ -28,7 +26,7 @@ const PokemonItem: React.FC<{
         </p>
         <div style={s.typeList}>
           {types.map((type) => (
-            <div style={s.typeContainer(type)}>
+            <div key={`${name}-${type}`} style={s.typeContainer(type)}>
               <p style={s.typeText}>{type}</p>
             </div>
           ))}
@@ -39,7 +37,7 @@ const PokemonItem: React.FC<{
 };
 
 interface Styles {
-  container: (pagewidth: number, columns: number) => CSSProperties;
+  container: (pagewidth: number) => CSSProperties;
   name: CSSProperties;
   number: CSSProperties;
   typeContainer: (type: string) => CSSProperties;
@@ -48,13 +46,13 @@ interface Styles {
 }
 
 const s: Styles = {
-  container: (pageWidth, columns) => ({
+  container: (pageWidth) => ({
     padding: 8,
     margin: 8,
     marginTop: 0,
     borderRadius: 4,
     boxShadow: "0.5px 2px 8px rgba(0,0,0,0.15)",
-    width: (pageWidth - 16 * (columns + 1)) / columns,
+    width: pageWidth > 700 ? 163 : (pageWidth - 16 * 3) / 2,
   }),
   name: {
     fontSize: 18,
