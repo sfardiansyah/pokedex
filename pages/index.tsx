@@ -10,8 +10,8 @@ import {
   useState,
 } from "react";
 
-import PokemonItem from "./PokemonItem";
-import Navbar from "./Navbar";
+import PokemonItem from "../components/PokemonItem";
+import Navbar from "../components/Navbar";
 
 import { Pokemon } from "../types";
 

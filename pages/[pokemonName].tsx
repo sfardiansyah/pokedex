@@ -6,11 +6,11 @@ import { CSSProperties, memo, useCallback, useEffect, useState } from "react";
 import { gql, useApolloClient } from "@apollo/client";
 import { useRouter } from "next/router";
 
-import DetailSection from "./DetailSection";
-import TypeSection from "./TypeSection";
+import DetailSection from "../components/DetailSection";
+import TypeSection from "../components/TypeSection";
+import Navbar from "../components/Navbar";
 
 import { Pokemon } from "../types";
-import Navbar from "./Navbar";
 
 const POKEMON_DETAIL = gql`
   query getPokemonDetail($name: String) {
