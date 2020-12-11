@@ -10,6 +10,7 @@ import DetailSection from "./DetailSection";
 import TypeSection from "./TypeSection";
 
 import { Pokemon } from "../types";
+import Navbar from "./Navbar";
 
 const POKEMON_DETAIL = gql`
   query getPokemonDetail($name: String) {
@@ -140,6 +141,7 @@ const PokemonDetail: React.FC = memo(() => {
         <title>{name} | Pokédex</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
+      <Navbar />
       <div style={{ maxWidth: 700, margin: "auto" }}>
         <div style={s.header}>
           <h1>{name}</h1>

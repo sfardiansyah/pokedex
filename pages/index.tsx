@@ -1,9 +1,18 @@
 import Head from "next/head";
 
 import { gql, useQuery } from "@apollo/client";
-import { CSSProperties, useCallback, useEffect, useRef, useState } from "react";
+import {
+  CSSProperties,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import PokemonItem from "./PokemonItem";
+import Navbar from "./Navbar";
+
 import { Pokemon } from "../types";
 
 const POKEMONS = gql`
@@ -19,13 +28,22 @@ const POKEMONS = gql`
 `;
 
 const Home: React.FC = () => {
-  const [first, setFirst] = useState(40);
+  const [first, setFirst] = useState(30);
+  const [typeFilter, setTypeFilter] = useState<string | undefined>();
   const [hasMore, sethasMore] = useState(true);
   const [pokemonList, setPokemonList] = useState<Pokemon[]>([]);
 
   const { loading, data } = useQuery<{ pokemons: Pokemon[] }>(POKEMONS, {
     variables: { n: first },
   });
+
+  const filteredList = useMemo(
+    () =>
+      typeFilter
+        ? pokemonList.filter(({ types }) => types.includes(typeFilter))
+        : pokemonList,
+    [pokemonList, typeFilter]
+  );
 
   const observer = useRef<IntersectionObserver>();
 
@@ -64,10 +82,11 @@ const Home: React.FC = () => {
         <title>Home | Pokédex</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
+      <Navbar showFilter changeFilter={setTypeFilter} />
       <div style={{ padding: "16px 8px" }}>
         <div style={s.listContainer}>
-          {pokemonList.map((pokemon, i) =>
-            i === pokemonList.length - 1 ? (
+          {filteredList.map((pokemon, i) =>
+            i === filteredList.length - 1 ? (
               <PokemonItem
                 key={pokemon.number}
                 forwardRef={lastRef}
